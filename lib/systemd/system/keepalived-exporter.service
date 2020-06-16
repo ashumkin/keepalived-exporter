@@ -1,0 +1,14 @@
+[Unit]
+Description=Keepalived Prometheus exporter
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/keepalived-exporter
+TimeoutSec=60
+
+User=root
+Group=root
+
+[Install]
+WantedBy=multi-user.target

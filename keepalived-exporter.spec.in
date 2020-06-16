@@ -1,0 +1,61 @@
+%define service_name keepalived-exporter
+Name:		keepalived-exporter
+Version:	@@VERSION@@
+Release:	%{Release}
+Summary:	Keepalived Prometheus exporter
+Source:	%{name}-%{version}.tar.gz
+Group:		Applications/System
+License:	GPLv3
+Packager:	%{packager}
+BuildRoot:	    %{_tmppath}/%{name}-%{version}-%{release}-root
+
+
+%define debug_package %{nil}
+
+%description
+Keepalived Prometheus exporter
+
+
+%prep
+%setup -q
+
+
+%install
+rm -fr ${RPM_BUILD_ROOT}
+mkdir -p ${RPM_BUILD_ROOT}/usr/bin
+mkdir -p ${RPM_BUILD_ROOT}/lib/systemd/system
+%make_install PREFIX=%{_prefix} VERSION=%{version} INSTALL="install -p"
+
+%clean
+rm -fr ${RPM_BUILD_ROOT}
+
+%files
+/usr/bin/keepalived-exporter
+/lib/systemd/system/%{service_name}.service
+
+
+%doc LICENSE
+
+
+%post
+/usr/bin/systemctl enable %{service_name}
+
+
+%preun
+if [ $1 = 0 ]; then # package is being erased, not upgraded
+    /usr/bin/systemctl stop %{service_name} > /dev/null 2>&1
+    /usr/bin/systemctl disable %{service_name}
+fi
+
+
+%postun
+if [ $1 = 0 ]; then # package is being erased
+    # Any needed actions here on uninstalls
+    echo
+else
+    # Upgrade
+    /usr/bin/systemctl restart %{service_name} > /dev/null 2>&1
+fi
+
+
+%changelog

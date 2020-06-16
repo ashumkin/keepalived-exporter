@@ -26,8 +26,20 @@ jobs:
       run: make dep
 
     - name: Build
-      run: make build
-  
+      run: make build tar
+
+    - name: Build RPM
+      run: make rpm-docker DOCKER_USER=root
+
+    - name: Get RPM version
+      id: get-rpm-version
+      run: echo "::set-output name=rpm-version::"$(make rpm-version)
+
+    - uses: actions/upload-artifact@v2
+      with:
+        path: keepalived-exporter*.rpm
+        name: keepalived-exporter-${{ steps.get-rpm-version.outputs.rpm-version }}
+
   test:
     name: Test
     runs-on: ubuntu-latest
